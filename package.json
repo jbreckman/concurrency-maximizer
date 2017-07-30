@@ -1,0 +1,15 @@
+{
+  "name": "concurrency-maximizer",
+  "version": "1.0.0",
+  "description": "Monitor and maximize concurrency to prevent overloading external resources",
+  "main": "concurrency-maximizer.js",
+  "scripts": {
+    "simulate": "node simulate.js",
+    "test": "tap test.js"
+  },
+  "author": "Josh Breckman",
+  "private": false,
+  "devDependencies": {
+    "bluebird": "^3.1.5"
+  }
+}
