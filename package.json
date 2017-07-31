@@ -7,6 +7,7 @@
     "simulate": "node simulate.js",
     "test": "tap test.js"
   },
+  "homepage": "https://github.com/jbreckman/concurrency-maximizer",
   "author": "Josh Breckman",
   "private": false,
   "devDependencies": {
