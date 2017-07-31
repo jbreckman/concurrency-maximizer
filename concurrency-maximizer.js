@@ -18,10 +18,6 @@ class ConcurrencyMaximizer {
     return () => this.processWindow(this.time() - startTime);
   }
 
-  blendWindow(duration, blendAmount) {
-    this._targetWindowDuration = (duration * blendAmount) + (this._targetWindowDuration * (1 - blendAmount));
-  }
-
   processWindow(duration) {
     if (this._ignoreNext > 0) {
       this._ignoreNext--;
@@ -68,12 +64,7 @@ class ConcurrencyMaximizer {
       }
       // if we have slowed up by some measurable amount, we're gonna need to reduce our concurrency
       else if (duration > this._targetWindowDuration * (1 + this._windowFlexibility*2)) {
-        // if we are slower and we are already at a concurrency of 1,
-        // we should adjust our fastest window expectations to be a bit slower
-        if (this.concurrency === 1) {
-          this.blendWindow(duration, this._windowFlexibility / 3);
-        }
-        else if (Math.random() < this._windowFlexibility * this._windowFlexibility) {
+        if (Math.random() < this._windowFlexibility * this._windowFlexibility) {
           this.concurrency--;
         }
       }
