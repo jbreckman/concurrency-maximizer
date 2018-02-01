@@ -3,12 +3,13 @@ const WINDOW_DURATION_BOUNDARY = 0.25;
 
 class ConcurrencyMaximizer {
   
-  constructor(windowSize, windowFlexibility) {
+  constructor(windowSize, windowFlexibility, maximumDuration) {
     this.concurrency = 1;
     this._ignoreNext = 0;
     this._window = [];
     this._targetWindowDuration = 0;
     this._smallestTargetWindowDuration = Number.MAX_SAFE_INTEGER;
+    this._maximumDuration = maximumDuration || Number.MAX_SAFE_INTEGER;
     this._windowSize = windowSize || WINDOW_SIZE;
     this._windowFlexibility = windowFlexibility || WINDOW_DURATION_BOUNDARY;
   }
@@ -35,7 +36,12 @@ class ConcurrencyMaximizer {
       this._smallestTargetWindowDuration = Math.min(duration, this._smallestTargetWindowDuration);
       
       // if we have a new fastest window, reset it and bump our concurrency
-      if (duration < this._targetWindowDuration || !this._targetWindowDuration) {
+      if (duration > this._maximumDuration) {
+        if (this.concurrency > 1) {
+          this.concurrency--;
+        }
+      }
+      else if (duration < this._targetWindowDuration || !this._targetWindowDuration) {
         if (!this._targetWindowDuration) {
           this.concurrency++;
         }

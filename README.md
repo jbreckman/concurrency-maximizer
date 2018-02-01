@@ -33,9 +33,10 @@ Promise.map(someBigList, doTask, { concurrency: () => maximizer.concurrency });
 
 ### Instructions
 
-The maximizer has 2 inputs:
+The maximizer has 3 inputs:
 * `window size`: The number of samples to take before making adjustments.  Defaults to 4.
 * `flexibility`: A multiplier that dictates how far you want to allow the system to deviate from the fastest window size that it has seen.  Defaults to 0.25.
+* `maximumDuration`: If the tasks being measured have timeouts, the maximizer can get into a pathological state where it finds that adding concurrency won't slow stuff down because it is always hitting a timeout of X seconds.  If the task being measured does have a timeout on it, it is recommended to set a `maximumDuration` of the task to be some percent of the timeout.  If a task starts taking over this value, it will always back off concurrency.  
 
 To start processing one task, simply call `startItem` and get back a function that you execute when the task is done executing.  
 

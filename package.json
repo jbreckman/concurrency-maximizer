@@ -1,6 +1,6 @@
 {
   "name": "concurrency-maximizer",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Monitor and maximize concurrency to prevent overloading external resources",
   "main": "concurrency-maximizer.js",
   "scripts": {

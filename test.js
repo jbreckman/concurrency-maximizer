@@ -44,6 +44,43 @@ t.test('single maximizer reachs ideal concurrency',function(t) {
 });
 
 
+t.test('maxed duration (timeout) doesnt go out of control',function(t) {
+
+  // this caps time to 14ms,
+  // and the duration of an actual task is maxes at 15ms.
+  // without the limit in place, concurrency would keep getting 
+  // added and it'd go out of control
+  let ideal = 10;
+  let maximizer = new ConcurrencyMaximizer(10, 0.25, 14);
+  let time = 0;
+  let steps = 10000;
+  let maximimumConcurrency = 0;
+  let averageConcurrency = 0;
+  maximizer.time = () => time;
+
+  for (let i = 0; i < steps; i++) {
+    let tasks = [];
+    let taskCount = maximizer.concurrency;
+    for (let j = 0; j < taskCount; j++) {
+      tasks.push(maximizer.startItem());
+    }
+
+    maximimumConcurrency = Math.max(maximizer.concurrency, maximimumConcurrency);
+    averageConcurrency += maximizer.concurrency;
+
+    let duration = getDuration(ideal, taskCount);
+    duration = Math.min(duration, 15);
+
+    time += duration;
+    tasks.forEach(task => task());
+  }
+
+  t.same(maximimumConcurrency, 12);
+  assert(averageConcurrency / steps > 10 && averageConcurrency / steps < 12);
+  t.end();
+});
+
+
 t.test('single maximizer but hits sudden slowdown',function(t) {
 
   let ideal = 10;
