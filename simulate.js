@@ -3,8 +3,8 @@ const Promise = require('bluebird');
 
 function work(counter) {
   return Promise.resolve().then(() => {
-    var value = Math.random() * 1000000;
-    for (var i = 1; i < 100000; i++) {
+    var value = Math.random() * 100000;
+    for (var i = 1; i < 10000; i++) {
       value /= i;
     }
     if (counter > 0) return Promise.delay(1).then(() => work(counter - 1));
@@ -14,7 +14,7 @@ function work(counter) {
 
 class Worker {
   constructor(taskSize, numberToRun) {
-    this.maximizer = new Maximizer(5, 0.25, 70);
+    this.maximizer = new Maximizer(15, 0.5, 200, 2);
     this.numberActive = 0;
     this.numberToRun = numberToRun;
     this.taskSize = taskSize;
