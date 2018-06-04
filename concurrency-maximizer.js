@@ -11,7 +11,8 @@ class ConcurrencyMaximizer {
     this._targetWindowDuration = 0;
     this._smallestTargetWindowDuration = Number.MAX_SAFE_INTEGER;
     this._maximumDuration = maximumDuration || Number.MAX_SAFE_INTEGER;
-    this._windowSize = windowSize || WINDOW_SIZE;
+    this._windowSize = this.baseline;
+    this._maximumWindowSize = windowSize || WINDOW_SIZE;
     this._windowFlexibility = windowFlexibility || WINDOW_DURATION_BOUNDARY;
   }
 
@@ -33,7 +34,24 @@ class ConcurrencyMaximizer {
       // an unusually long amount of time, this should be a good way to isolate this new experiment
       this._ignoreNext = this.concurrency + this.baseline;
 
-      let duration = this._window.reduce((agg, d) => agg + d, 0) / this._windowSize;
+      // find the mean and standard deviation.  Take the lower end of the standard deviation
+      // as a way to find a "floor".  If we are hitting some remote resource limit, this
+      // floor is likely going to be the number that actually is moving.  This should handle
+      // wildly fluctuating response times a bit better.
+      let mean = this._window.reduce((agg, d) => agg + d, 0) / this._windowSize;
+      let standardDeviation = Math.sqrt(this._window.reduce((agg, d) => agg+((d - mean)*(d - mean)), 0) / this._windowSize);
+      let duration = mean - standardDeviation;
+
+      // if our standard deviation is "large", increase the window size
+      // (starting with a small window allows for faster ramp up)
+      if (standardDeviation > mean * 0.2) {
+        this._windowSize = Math.min(this._windowSize + 1, this._maximumWindowSize);
+      }
+
+      if (duration < 1) {
+        duration = mean;
+      }
+
       this._smallestTargetWindowDuration = Math.min(duration, this._smallestTargetWindowDuration);
       
       // if we have a new fastest window, reset it and bump our concurrency

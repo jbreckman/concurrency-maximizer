@@ -53,7 +53,7 @@ t.test('maxed duration (timeout) doesnt go out of control',function(t) {
   let ideal = 10;
   let maximizer = new ConcurrencyMaximizer(10, 0.25, 14);
   let time = 0;
-  let steps = 10000;
+  let steps = 50000;
   let maximimumConcurrency = 0;
   let averageConcurrency = 0;
   maximizer.time = () => time;
@@ -76,7 +76,7 @@ t.test('maxed duration (timeout) doesnt go out of control',function(t) {
   }
 
   t.same(maximimumConcurrency, 12);
-  assert(averageConcurrency / steps > 10 && averageConcurrency / steps < 12);
+  assert(averageConcurrency / steps > 8 && averageConcurrency / steps < 10);
   t.end();
 });
 
