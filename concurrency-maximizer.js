@@ -104,6 +104,38 @@ class ConcurrencyMaximizer {
 
   // pulled out for mocking
   time() { return new Date().getTime(); }
+
+  map(array, fn) {
+    let nextIndex = 0, currentActive = 0, results = [], outerResolve = null, outerReject = null;
+    let finalPromise = new Promise((resolve,reject) => {
+      outerResolve = resolve;
+      outerReject = reject;
+    });
+    let fill = () => {
+      while (currentActive < this.concurrency && nextIndex < array.length) {
+        currentActive++;
+        let token = this.startItem();
+        let fnResult = fn(array[nextIndex]);
+        results[nextIndex] = fnResult;
+        fnResult
+          .catch(e => {
+            nextIndex = array.length;
+            outerReject(e);
+          })
+          .finally(() => {
+            token();
+            currentActive--;
+            fill();
+          });
+        nextIndex++;
+        if (nextIndex === array.length) {
+          outerResolve(Promise.all(results));
+        }
+      }
+    };
+    fill();
+    return finalPromise;
+  }
 }
 
 module.exports = ConcurrencyMaximizer;

@@ -1,5 +1,6 @@
 const t = require('tap');
 const assert = require('assert');
+const Promise = require('bluebird');
 const ConcurrencyMaximizer = require('./concurrency-maximizer');
 
 function getDuration(idealConcurrent, numberConcurrent) {
@@ -228,5 +229,50 @@ t.test('single maximizer but hits minor speed up',function(t) {
   t.same(maximimumConcurrency, 15);
   assert(averageConcurrency / countAverage > 14 && averageConcurrency / countAverage < 15);
   t.end();
+});
+
+
+t.test('test map',function(t) {
+
+  let maximizer = new ConcurrencyMaximizer(10, 0.75);
+  let steps = 1000;
+  let maximimumConcurrency = 0;
+
+  let arr = [...new Array(steps)].map((d,i) => i);
+  let promise = maximizer.map(arr, inp => {
+    maximimumConcurrency = Math.max(maximimumConcurrency, maximizer.concurrency);
+    return Promise.delay(Math.random() * 150 + 100).then(() => inp * 2);
+  });
+
+
+  promise.then(results => {
+    t.same(results, [...new Array(steps)].map((d,i) => i*2), 'should match');
+    t.ok(maximimumConcurrency > 25, 'should have high concurrency');
+  })
+  .catch(e => {
+    t.notOk(true, 'should not error');
+  })
+  .finally(() => {
+    t.end();
+  });
+});
+
+
+t.test('test map with rejection', function(t) {
+
+  let maximizer = new ConcurrencyMaximizer(10, 0.75);
+  let steps = 100;
+  let maximimumConcurrency = 0;
+
+  let arr = [...new Array(steps)].map((d,i) => i);
+  let promise = maximizer.map(arr, inp => {
+    maximimumConcurrency = Math.max(maximimumConcurrency, maximizer.concurrency);
+    if (inp === 50) {
+      return Promise.reject('woops');
+    }
+    return Promise.delay(Math.random() * 150 + 100).then(() => inp * 2);
+  });
+
+  return t.rejects(promise, 'should reject');
 });
 
