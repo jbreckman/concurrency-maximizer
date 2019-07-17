@@ -22,13 +22,27 @@ const ConcurrencyMaximizer = require('concurrency-maximizer');
 
 let maximizer = new ConcurrencyMaximizer(5, 0.25);
 
+maximizer.map(someBigList, task => {
+  return Promise.delay(100).then(() => 5);
+}).then(results => {
+  // results have been solve
+});
+```
+
+Alternatively, if a package supports dynamic concurrency, you can do this via token directly:
+
+```
+const ConcurrencyMaximizer = require('concurrency-maximizer');
+
+let maximizer = new ConcurrencyMaximizer(5, 0.25);
+
 let doTask = task => {
   let finishToken = maximizer.startItem();
   // do work (possibly async)
   finishToken();
 };
 
-maximizer.map(someBigList, doTask);
+etl.map(someBigList, doTask, { concurrency: () => maximizer.concurrency });
 ```
 
 ### Instructions
