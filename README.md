@@ -28,7 +28,7 @@ let doTask = task => {
   finishToken();
 };
 
-Promise.map(someBigList, doTask, { concurrency: () => maximizer.concurrency });
+maximizer.map(someBigList, doTask);
 ```
 
 ### Instructions
@@ -40,5 +40,7 @@ The maximizer has 3 inputs:
 
 To start processing one task, simply call `startItem` and get back a function that you execute when the task is done executing.  
 
-Whatever is controlling concurrency of tasks should check for the latest `concurrency` property on the maximizer.  Right now `Promise.map` does not allow for concurrency to be modified as execution changes.
+Whatever is controlling concurrency of tasks should check for the latest `concurrency` property on the maximizer.  `etl` supports dynamic concurrency, but most promise libraries do not.
+
+You can use `map` on your `ConcurrencyMaximizer` to maximize promise solving over that array.
 
